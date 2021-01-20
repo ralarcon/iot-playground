@@ -1,0 +1,118 @@
+
+az iot dps create --name iot-playground-dps --resource-group iot-playground-rsg
+az iot hub create --resource-group iot-playground-rsg --name iot-playground-devices-hub --sku S1 --partition-count 2 --location westeurope
+
+
+# SETUP CERTFICATES
+# https://docs.microsoft.com/en-us/azure/iot-edge/how-to-create-test-certificates
+# Download or Copy certs tools from git clone https://github.com/Azure/iotedge.git
+
+## copy <path>\iotedge\tools\CACertificates\*.cnf .
+## copy <path>\iotedge\tools\CACertificates\ca-certs.ps1 .
+
+## Prepare
+Set-ExecutionPolicy -ExecutionPolicy Unrestricted -Scope CurrentUser
+. .\ca-certs.ps1
+Test-CACertsPrerequisites
+
+## Create CA chain
+New-CACertsCertChain rsa
+
+## Create IoT Edge Devices Identity Certs
+New-CACertsEdgeDeviceIdentity "Edge1"
+New-CACertsEdgeDeviceIdentity "Edge2"
+New-CACertsEdgeDeviceIdentity "Edge3"
+New-CACertsEdgeDeviceIdentity "Edge4"
+
+## Create IoT Edge device CA certificates
+New-CACertsEdgeDevice "Edge1-CA"
+New-CACertsEdgeDevice "Edge2-CA"
+New-CACertsEdgeDevice "Edge3-CA"
+New-CACertsEdgeDevice "Edge4-CA"
+
+## Upload Root CA to IoT Hub and Verify it
+az iot hub certificate create --hub-name iot-playground-devices-hub --name RagcDevTestRootCA --path .\certs\azure-iot-test-only.root.ca.cert.pem
+$etag = az iot hub certificate show --hub-name iot-playground-devices-hub --name RagcDevTestRootCA --query etag -o tsv
+$verificationInfo = (az iot hub certificate generate-verification-code --hub-name iot-playground-devices-hub --name RagcDevTestRootCA --etag $etag | ConvertFrom-Json)
+New-CACertsVerificationCert $verificationInfo.properties.verificationCode
+az iot hub certificate verify --hub-name iot-playground-devices-hub --name RagcDevTestRootCA --path .\certs\iot-device-verification-code.cert.pem --etag $verificationInfo.etag
+
+## Generate Certs for Upstream Devices 
+New-CACertsDevice "Upstream1_Edge1"
+New-CACertsDevice "Upstream2_Edge1"
+New-CACertsDevice "Upstream3_Edge1"
+New-CACertsDevice "Upstream4_Edge1"
+
+New-CACertsDevice "Upstream1_Edge2"
+New-CACertsDevice "Upstream2_Edge2"
+New-CACertsDevice "Upstream3_Edge2"
+New-CACertsDevice "Upstream4_Edge2"
+
+New-CACertsDevice "Upstream1_Edge3"
+New-CACertsDevice "Upstream2_Edge3"
+New-CACertsDevice "Upstream3_Edge3"
+New-CACertsDevice "Upstream4_Edge3"
+
+New-CACertsDevice "Upstream1_Edge4"
+New-CACertsDevice "Upstream2_Edge4"
+New-CACertsDevice "Upstream3_Edge4"
+New-CACertsDevice "Upstream4_Edge4"
+
+#Regorganize Certs
+mkdir edge1
+mv .\certs\*Edge1* .\edge1\
+mv .\private\*Edge1* .\edge1\
+cp certs\azure-iot-test-only.root.ca.cert.pem edge1
+
+mkdir edge2
+mv .\certs\*Edge2* .\edge2\
+mv .\private\*Edge2* .\edge2\
+cp certs\azure-iot-test-only.root.ca.cert.pem edge2
+
+mkdir edge3
+mv .\certs\*Edge3* .\edge3\
+mv .\private\*Edge3* .\edge3\
+cp certs\azure-iot-test-only.root.ca.cert.pem edge3
+
+mkdir edge4
+mv .\certs\*Edge4* .\edge4\
+mv .\private\*Edge4* .\edge4\
+cp certs\azure-iot-test-only.root.ca.cert.pem edge4
+
+## Upload Root CA to IoT DPS and Verify it
+ROOT
+az iot dps certificate create --dps-name iot-playground-dps --resource-group iot-playground-rsg --name RagcDevTestRootCA --path .\certs\azure-iot-test-only.root.ca.cert.pem
+$etag = az iot dps certificate show --dps-name iot-playground-dps --resource-group iot-playground-rsg --name RagcDevTestRootCA --query etag -o tsv
+$verificationInfo = (az iot dps certificate generate-verification-code --dps-name iot-playground-dps --resource-group iot-playground-rsg --name RagcDevTestRootCA --etag $etag | ConvertFrom-Json)
+New-CACertsVerificationCert $verificationInfo.properties.verificationCode
+az iot dps certificate verify --dps-name iot-playground-dps --resource-group iot-playground-rsg --name RagcDevTestRootCA --path .\certs\iot-device-verification-code.cert.pem --etag $verificationInfo.etag
+
+#INTERMEDIATE CA
+##>>> OJO, tuve que subirlo a mano
+az iot dps certificate create --dps-name iot-playground-dps --resource-group iot-playground-rsg --name RagcDevTestIntermediateCA --path .\certs\azure-iot-test-only.intermediate-full-chain.cert.pem 
+$etag = az iot dps certificate show --dps-name iot-playground-dps --resource-group iot-playground-rsg --name RagcDevTestIntermediateCA --query etag -o tsv
+$verificationInfo = (az iot dps certificate generate-verification-code --dps-name iot-playground-dps --resource-group iot-playground-rsg --name RagcDevTestIntermediateCA --etag $etag | ConvertFrom-Json)
+New-IntermediateCACertsVerificationCert $verificationInfo.properties.verificationCode
+az iot dps certificate verify --dps-name iot-playground-dps --resource-group iot-playground-rsg --name RagcDevTestIntermediateCA --path .\certs\iot-device-verification-code.cert.pem --etag $verificationInfo.etag
+
+#Create DPS enrollment group
+$hubConnStr = az iot hub show-connection-string --name iot-playground-devices-hub --query connectionString -o tsv
+az iot dps linked-hub create --connection-string $hubConnStr --dps-name iot-playground-dps --location westeurope --resource-group iot-playground-rsg
+az iot dps enrollment-group create --dps-name iot-playground-dps --enrollment-id iot-edge-devices --resource-group iot-playground-rsg --ca-name RagcDevTestRootCA --iot-hub-host-name iot-playground-devices-hub.azure-devices.net --initial-twin-tags "{'deviceType':'Edge'}" --edge-enabled true
+
+
+##VM SETUP:
+ssh-keygen -m PEM -t rsa -b 4096 -q -f iotedge-vm-iot-playground -N "iotedge-ragcdev"
+
+az deployment group create --resource-group iot-playground-rsg --template-file .\edgeDeploy.json --parameters dnsLabelPrefix='iot-pg-edge1' --parameters adminUsername='azureiotadmin' --parameters dpsScopeId='0ne001C0E34' --parameters identityCertPath='file:///home/azureiotadmin/edgeCerts/iot-edge-device-identity-Edge1-full-chain.cert.pem' --parameters identityPkPath='file:///home/azureiotadmin/edgeCerts/iot-edge-device-identity-Edge1.key.pem' --parameters deviceCaCertPath='file:///home/azureiotadmin/edgeCerts/iot-edge-device-Edge1-CA-full-chain.cert.pem' --parameters deviceCaPkPath='file:///home/azureiotadmin/edgeCerts/iot-edge-device-Edge1-CA.key.pem' --parameters trustedCaCertPath='file:///home/azureiotadmin/edgeCerts/azure-iot-test-only.root.ca.cert.pem' --parameters adminPasswordOrKey=$fileContent
+
+#Connect and create edgeCerts folder
+scp -i C:\Users\ralarcon\.ssh\iotedge-vm-iot-playground -pr ..\certificates\edge1\* azureiotadmin@iot-pg-edge1.westeurope.cloudapp.azure.com:~/edgeCerts/
+
+sudo nano /etc/iotedge/config.yaml
+#Comment / uncomment
+
+sudo systemctl restart iotedge
+systemctl status iotedge
+journalctl -u iotedge --no-pager --no-full
+sudo iotedge list

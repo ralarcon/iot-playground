@@ -348,3 +348,16 @@ MigrationBackup/
 
 # Ionide (cross platform F# VS Code tools) working folder
 .ionide/
+
+# CUSTOM: Private ps1 scripts
+*.private.ps1
+*.private
+*.local.*
+
+# EXCLUDE generated certificates
+certificates/certs
+certificates/csr
+certificates/intermediateCerts
+certificates/newcerts
+certificates/private
+certificates/edgeVms
