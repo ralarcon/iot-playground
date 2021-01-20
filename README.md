@@ -11,3 +11,4 @@ The VMs are provisioned using an ARM template with a Cloud Init script which pro
 * Based on [Run Azure IoT Edge on Ubuntu Virtual Machines](https://docs.microsoft.com/en-us/azure/iot-edge/how-to-install-iot-edge-ubuntuvm?WT.mc_id=github-iotedgevmdeploy-pdecarlo) 
 * Original repo: https://github.com/Azure/iotedge-vm-deploy
 
+Certificate generation based on https://github.com/Azure/iotedge.git (modified to change the expiration default for PoC purspose). NEVER USE IN PRODUCTION.
