@@ -17,10 +17,10 @@ $adminUserName="azureiotadmin"
 
 New-CACertsEdgeDeviceIdentity "$edgeDeviceName" "azure-iot-test-only.root.ca"
 New-CACertsEdgeDevice "$edgeDeviceName-CA"
-New-CACertsDevice "Upstream1_$edgeDeviceName"
-New-CACertsDevice "Upstream2_$edgeDeviceName"
-New-CACertsDevice "Upstream3_$edgeDeviceName"
-New-CACertsDevice "Upstream4_$edgeDeviceName"
+# New-CACertsDevice "Upstream1_$edgeDeviceName"
+# New-CACertsDevice "Upstream2_$edgeDeviceName"
+# New-CACertsDevice "Upstream3_$edgeDeviceName"
+# New-CACertsDevice "Upstream4_$edgeDeviceName"
 
 #Regorganize Certs
 New-Item -Path .\certificates\edgeVms\$edgeDeviceName -Force -ItemType Directory
