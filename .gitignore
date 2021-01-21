@@ -361,3 +361,7 @@ certificates/intermediateCerts
 certificates/newcerts
 certificates/private
 certificates/edgeVms
+certificates/index.txt
+certificates/index.txt.old
+certificates/serial
+certificates/serial.old
