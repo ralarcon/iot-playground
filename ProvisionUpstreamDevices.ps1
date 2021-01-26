@@ -30,15 +30,6 @@ Move-Item -Path .\certificates\certs\*$edgeDeviceName* -Destination .\certificat
 Move-Item -Path .\certificates\private\*$edgeDeviceName* -Destination .\certificates\edgeVms\$edgeDeviceName\upstreamCerts -Exclude .\certificates\$edgeDeviceName -Force
 Copy-Item -Path .\certificates\certs\azure-iot-test-only.root.ca.cert.pem -Destination .\certificates\edgeVms\$edgeDeviceName\upstreamCerts -Force ##TODO: is required?
 
-# Upload Certs to Storage Account
-# az storage blob upload-batch --account-name $storageAccount --destination certificates --source ".\certificates\edgeVms\$edgeDeviceName\upstream" --destination-path "$edgeDeviceName\upstream"
-
-# $expiry=((Get-Date).AddMinutes(30).ToString("yyyy-MM-ddTHH:mm:ssZ"))
-# $sas=(az storage container generate-sas --account-name $storageAccount --name certificates --permissions rl --expiry $expiry -o tsv)
-# $certsStorageSasUrl="""https://$storageAccount.blob.core.windows.net/certificates/$edgeDeviceName/*?$sas"""
-# $rsaPubContent=(Get-Content -Path $HOME/.ssh/iotedge-vm-iot-playground.pub)
-
-
 $deviceExists=(az iot hub device-identity show --device-id $edgeDeviceName --hub-name $iotHub)
 if($deviceExists){
     az iot hub device-identity create -n $iotHub -d "$ups1DeviceName" --am x509_ca 
@@ -54,5 +45,27 @@ if($deviceExists){
     az iot hub device-identity parent set -d "$ups4DeviceName" --pd "$edgeDeviceName" -n $iotHub --force
 }
 
-scp -i $HOME/.ssh/iotedge-vm-iot-playground -r ".\certificates\edgeVms\$edgeDeviceName\upstreamCerts" "$adminUserName@iot-playground-$edgeDeviceName.westeurope.cloudapp.azure.com:~/"
+dotnet build .\simulated-x509-device\simulated-x509-device.csproj -r linux-x64 -p:PublishSingleFile=true
+dotnet publish .\simulated-x509-device\simulated-x509-device.csproj -r linux-x64 -p:PublishSingleFile=true --self-contained true -o ..\upstreamDevice\
 
+scp -i $HOME/.ssh/iotedge-vm-iot-playground -r ".\upstreamDevice" "$adminUserName@iot-playground-$edgeDeviceName.westeurope.cloudapp.azure.com:~/"
+scp -i $HOME/.ssh/iotedge-vm-iot-playground -r ".\certificates\edgeVms\$edgeDeviceName\upstreamCerts" "$adminUserName@iot-playground-$edgeDeviceName.westeurope.cloudapp.azure.com:~/upstreamDevice"
+
+Write-Host ""
+Write-Host "Now log into the edge VM: ssh -i $HOME/.ssh/iotedge-vm-iot-playground $adminUserName@iot-playground-$edgeDeviceName.westeurope.cloudapp.azure.com"
+Write-Host "Run the following commands: "
+Write-Host "    $ cd upstreamDevice"
+Write-Host "    $ chmod +x setup.upstreamDevices.sh"
+Write-Host "    $ ./setup.upstreamDevices.sh $edgeDeviceName"
+Write-Host ""
+Write-Host "The ouptut should be like:"
+Write-Host "● upstreamDevices.service - Launch upstream devices"
+Write-Host "   Loaded: loaded (/etc/systemd/system/upstreamDevices.service; enabled; vendor preset: enabled)"
+Write-Host "   Active: active (exited) since Tue 2021-01-26 14:03:04 UTC; 1h 26min ago"
+Write-Host " Main PID: 1781 (code=exited, status=0/SUCCESS)"
+Write-Host "    Tasks: 35 (limit: 4075)"
+Write-Host "   CGroup: /system.slice/upstreamDevices.service"
+Write-Host "           ├─1840 /home/azureiotadmin/upstreamDevice/simulated-x509-device edge1-ups1 iot-playground-devices-hub.azure-devices.net iot-playground-edge1-vm..."
+Write-Host "           ├─1860 /home/azureiotadmin/upstreamDevice/simulated-x509-device edge1-ups2 iot-playground-devices-hub.azure-devices.net iot-playground-edge1-vm..."
+Write-Host "           ├─1893 /home/azureiotadmin/upstreamDevice/simulated-x509-device edge1-ups3 iot-playground-devices-hub.azure-devices.net iot-playground-edge1-vm..."
+Write-Host "           └─1928 /home/azureiotadmin/upstreamDevice/simulated-x509-device edge1-ups4 iot-playground-devices-hub.azure-devices.net iot-playground-edge1-vm..."

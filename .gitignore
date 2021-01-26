@@ -357,11 +357,11 @@ MigrationBackup/
 # EXCLUDE generated certificates
 certificates/certs
 certificates/csr
-certificates/intermediateCerts
-certificates/newcerts
-certificates/private
-certificates/edgeVms
-certificates/index.txt
-certificates/index.txt.old
-certificates/serial
-certificates/serial.old
+certificates/intermediateCerts/*
+certificates/newcerts/*
+certificates/private/*
+certificates/edgeVms/*
+certificates/**/index.txt*
+certificates/**/serial*
+
+upstreamDevice/simulated-x509-device*

@@ -165,5 +165,6 @@ runcmd:
         sudo systemctl restart docker
 
         sudo systemctl unmask iotedge
+        sudo systemctl enable iotedge
         sudo systemctl start iotedge
       ) &
