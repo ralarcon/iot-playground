@@ -17,10 +17,6 @@ $adminUserName="azureiotadmin"
 
 New-CACertsEdgeDeviceIdentity "$edgeDeviceName" "azure-iot-test-only.root.ca"
 New-CACertsEdgeDevice "$edgeDeviceName-CA"
-# New-CACertsDevice "Upstream1_$edgeDeviceName"
-# New-CACertsDevice "Upstream2_$edgeDeviceName"
-# New-CACertsDevice "Upstream3_$edgeDeviceName"
-# New-CACertsDevice "Upstream4_$edgeDeviceName"
 
 #Regorganize Certs
 New-Item -Path .\certificates\edgeVms\$edgeDeviceName -Force -ItemType Directory
@@ -42,5 +38,6 @@ Write-Host "Executing VM Provisioning. Running command: "
 Write-Host "az deployment group create --resource-group $rsg --template-file .\iotedge-vm-deploy\edgeDeploy.json --parameters edgeDeviceName="$edgeDeviceName" certsStorageSasUrl="$certsStorageSasUrl" adminUsername="$adminUserName" dpsScopeId="$dpsScopeId" adminPasswordOrKey="$rsaPubContent""
 Write-Host ""
 az deployment group create --resource-group $rsg --template-file .\iotedge-vm-deploy\edgeDeploy.json --parameters edgeDeviceName="$edgeDeviceName" certsStorageSasUrl="$certsStorageSasUrl" adminUsername="$adminUserName" dpsScopeId="$dpsScopeId" adminPasswordOrKey="$rsaPubContent"
-az vm auto-shutdown --resource-group $rsg --name iot-playground-$EdgeDeviceName-vm --time 1930 
+az vm auto-shutdown --resource-group $rsg --name iot-playground-$EdgeDeviceName-vm --time 0000 
+
 

@@ -85,7 +85,7 @@ namespace simulated_x509_device
             int msgCount = 1;
             while(true)
             {
-                int delay=rnd.Next(500, 2500);
+                int delay=5000; //Delay 5 seconds each message
                 await SendEvent(deviceClient, msgCount);
                 msgCount++;
                 await Task.Delay(delay);

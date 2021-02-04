@@ -32,16 +32,28 @@ Copy-Item -Path .\certificates\certs\azure-iot-test-only.root.ca.cert.pem -Desti
 
 $deviceExists=(az iot hub device-identity show --device-id $edgeDeviceName --hub-name $iotHub)
 if($deviceExists){
-    az iot hub device-identity create -n $iotHub -d "$ups1DeviceName" --am x509_ca 
+    $upsDeviceExists=(az iot hub device-identity show --device-id $ups1DeviceName --hub-name $iotHub)
+    if(!$upsDeviceExists){
+        az iot hub device-identity create -n $iotHub -d "$ups1DeviceName" --am x509_ca 
+    }
     az iot hub device-identity parent set -d "$ups1DeviceName" --pd "$edgeDeviceName" -n $iotHub --force
 
-    az iot hub device-identity create -n $iotHub -d "$ups2DeviceName" --am x509_ca 
+    $upsDeviceExists=(az iot hub device-identity show --device-id $ups2DeviceName --hub-name $iotHub)
+    if(!$upsDeviceExists){
+        az iot hub device-identity create -n $iotHub -d "$ups2DeviceName" --am x509_ca 
+    }
     az iot hub device-identity parent set -d "$ups2DeviceName" --pd "$edgeDeviceName" -n $iotHub --force
 
-    az iot hub device-identity create -n $iotHub -d "$ups3DeviceName" --am x509_ca 
+    $upsDeviceExists=(az iot hub device-identity show --device-id $ups3DeviceName --hub-name $iotHub)
+    if(!$upsDeviceExists){
+        az iot hub device-identity create -n $iotHub -d "$ups3DeviceName" --am x509_ca 
+    }
     az iot hub device-identity parent set -d "$ups3DeviceName" --pd "$edgeDeviceName" -n $iotHub --force
 
-    az iot hub device-identity create -n $iotHub -d "$ups4DeviceName" --am x509_ca 
+    $upsDeviceExists=(az iot hub device-identity show --device-id $ups4DeviceName --hub-name $iotHub)
+    if(!$upsDeviceExists){
+        az iot hub device-identity create -n $iotHub -d "$ups4DeviceName" --am x509_ca 
+    }
     az iot hub device-identity parent set -d "$ups4DeviceName" --pd "$edgeDeviceName" -n $iotHub --force
 }
 
@@ -69,3 +81,4 @@ Write-Host "           ├─1840 /home/azureiotadmin/upstreamDevice/simulated-x
 Write-Host "           ├─1860 /home/azureiotadmin/upstreamDevice/simulated-x509-device edge1-ups2 iot-playground-devices-hub.azure-devices.net iot-playground-edge1-vm..."
 Write-Host "           ├─1893 /home/azureiotadmin/upstreamDevice/simulated-x509-device edge1-ups3 iot-playground-devices-hub.azure-devices.net iot-playground-edge1-vm..."
 Write-Host "           └─1928 /home/azureiotadmin/upstreamDevice/simulated-x509-device edge1-ups4 iot-playground-devices-hub.azure-devices.net iot-playground-edge1-vm..."
+Write-Host "Ensure the processes are up&running (ps aux) if not, try to launch the setup script again."

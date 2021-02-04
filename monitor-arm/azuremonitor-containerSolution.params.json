@@ -1,0 +1,12 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "workspaceResourceId":{
+      "value": "/subscriptions/cff5d937-9797-41da-b990-ba5295efb820/resourcegroups/iot-playground-rsg/providers/microsoft.operationalinsights/workspaces/iot-playground-devices-log"
+    },
+    "workspaceRegion":{
+      "value": "westeurope"
+    }
+  }
+}
