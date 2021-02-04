@@ -28,7 +28,7 @@
     },
     "vmSize": {
       "type": "string",
-      "defaultValue": "Standard_DS1_v2",
+      "defaultValue": "Standard_F1s",
       "metadata": {
         "description": "VM size"
       }
@@ -182,7 +182,7 @@
       }
     },
     {
-      "apiVersion": "2016-04-30-preview",
+      "apiVersion": "2019-03-01",
       "type": "Microsoft.Compute/virtualMachines",
       "name": "[variables('vmName')]",
       "location": "[parameters('location')]",
@@ -215,6 +215,11 @@
           "networkInterfaces": [{
             "id": "[resourceId('Microsoft.Network/networkInterfaces',variables('nicName'))]"
           }]
+        },
+        "priority": "Spot",
+        "evictionPolicy": "Deallocate",
+        "billingProfile": {
+            "maxPrice": -1
         }
       }
     }

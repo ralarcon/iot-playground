@@ -116,3 +116,10 @@ sudo systemctl restart iotedge
 systemctl status iotedge
 journalctl -u iotedge --no-pager --no-full
 sudo iotedge list
+
+
+#Create Log analytics workspace
+# https://docs.microsoft.com/en-gb/azure/azure-monitor/learn/quick-create-workspace#create-a-workspace
+
+az monitor log-analytics workspace create --resource-group iot-playground-rsg --workspace-name iot-playground-devices-log
+az deployment group create --resource-group iot-playground-rsg --template-file ./monitor-arm/azuremonitor-containerSolution.json --parameters ./monitor-arm/azuremonitor-containerSolution.params.json
