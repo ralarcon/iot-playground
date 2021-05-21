@@ -1,0 +1,128 @@
+{
+    "modulesContent": {
+        "$edgeAgent": {
+            "properties.desired": {
+                "modules": {
+                    "azureMonitor": {
+                        "settings": {
+                            "image": "mcr.microsoft.com/azuremonitor/containerinsights/ciprod:iot-0.1.3.3",
+                            "createOptions": ""
+                        },
+                        "type": "docker",
+                        "version": "1.0",
+                        "env": {
+                            "UploadTarget": {
+                                "value": "AzureMonitor "
+                            },
+                            "LogAnalyticsWorkspaceId": {
+                                "value": "9f105e40-7fa1-4ef4-ae90-f3f4e346a96f"
+                            },
+                            "LogAnalyticsSharedKey": {
+                                "value": "0NG6zGPeBM9VfjMG2O6+d4b0sDDMsEh3TGWOvh6GL6l/4azgpL8RsCZh0SlzfoDcOw30i+aWhw7Mw2rsu8701Q=="
+                            },
+                            "HubResourceID": {
+                                "value": "/subscriptions/cff5d937-9797-41da-b990-ba5295efb820/resourceGroups/iot-playground-rsg/providers/Microsoft.Devices/IotHubs/iot-playground-devices-hub"
+                            }
+                        },
+                        "status": "running",
+                        "restartPolicy": "always"
+                    },
+                    "sql": {
+                        "settings": {
+                            "image": "mcr.microsoft.com/azure-sql-edge/developer",
+                            "createOptions": "{\"HostConfig\":{\"CapAdd\":[\"SYS_PTRACE\"],\"Binds\":[\"sqlvolume:/sqlvolume\"],\"PortBindings\":{\"1433/tcp\":[{\"HostPort\":\"1433\"}]},\"Mounts\":[{\"Type\":\"volume\",\"Source\":\"sqlvolume\",\"Target\":\"/var/opt/mssql\"}]},\"Env\":[\"MSSQL_AGENT_ENABLED=TRUE\",\"ClientTransportType=AMQP_TCP_Only\",\"PlanId=asde-developer-on-iot-edge\"]}"
+                        },
+                        "type": "docker",
+                        "version": "1.0",
+                        "env": {
+                            "ACCEPT_EULA": {
+                                "value": "Y"
+                            },
+                            "MSSQL_SA_PASSWORD": {
+                                "value": "Pass@word.123.###"
+                            },
+                            "MSSQL_LCID": {
+                                "value": "1033"
+                            },
+                            "MSSQL_COLLATION": {
+                                "value": "SQL_Latin1_General_CP1_CI_AS"
+                            }
+                        },
+                        "status": "running",
+                        "restartPolicy": "always"
+                    },
+                    "grafana": {
+                        "settings": {
+                            "image": "grafana/grafana",
+                            "createOptions": "{\"HostConfig\":{\"Binds\":[\"grafanavolume:/grafanavolume\"],\"PortBindings\":{\"3000/tcp\":[{\"HostPort\":\"3000\"}]},\"Mounts\":[{\"Type\":\"volume\",\"Source\":\"grafanavolume\",\"Target\":\"/var/lib/grafana\"}]}}"
+                        },
+                        "type": "docker",
+                        "version": "1.0",
+                        "status": "running",
+                        "restartPolicy": "always"
+                    }
+                },
+                "runtime": {
+                    "settings": {
+                        "minDockerVersion": "v1.25"
+                    },
+                    "type": "docker"
+                },
+                "schemaVersion": "1.1",
+                "systemModules": {
+                    "edgeAgent": {
+                        "settings": {
+                            "image": "mcr.microsoft.com/azureiotedge-agent:1.0",
+                            "createOptions": "{\"HostConfig\":{\"Binds\":[\"/etc/iotedge/storage/:/iotedge/storage/\"]}}"
+                        },
+                        "type": "docker",
+                        "env": {
+                            "storageFolder": {
+                                "value": "/iotedge/storage/"
+                            },
+                            "SendRuntimeQualityTelemetry": {
+                                "value": "false"
+                            }
+                        }
+                    },
+                    "edgeHub": {
+                        "settings": {
+                            "image": "mcr.microsoft.com/azureiotedge-hub:1.0",
+                            "createOptions": "{\"HostConfig\":{\"Binds\":[\"/etc/iotedge/storage/:/iotedge/storage/\"],\"PortBindings\":{\"8883/tcp\":[{\"HostPort\":\"8883\"}],\"5671/tcp\":[{\"HostPort\":\"5671\"}],\"443/tcp\":[{\"HostPort\":\"443\"}]}}}"
+                        },
+                        "type": "docker",
+                        "env": {
+                            "storageFolder": {
+                                "value": "/iotedge/storage/"
+                            }
+                        },
+                        "status": "running",
+                        "restartPolicy": "always"
+                    }
+                }
+            }
+        },
+        "$edgeHub": {
+            "properties.desired": {
+                "routes": {
+                    "default": "FROM /messages/* INTO $upstream",
+                    "sensors": "FROM /messages/* INTO BrokeredEndpoint(\"/modules/sql/inputs/TempSensorStream\")",
+                    "sqltohub": "FROM /messages/modules/sql/streamoutput INTO $upstream"
+                },
+                "schemaVersion": "1.1",
+                "storeAndForwardConfiguration": {
+                    "timeToLiveSecs": 7200
+                }
+            }
+        },
+        "azureMonitor": {
+            "properties.desired": {}
+        },
+        "sql": {
+            "properties.desired": {}
+        },
+        "grafana": {
+            "properties.desired": {}
+        }
+    }
+}

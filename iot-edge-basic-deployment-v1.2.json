@@ -1,0 +1,111 @@
+{
+    "modulesContent": {
+        "$edgeAgent": {
+            "properties.desired": {
+                "modules": {
+                    "SimulatedTemperatureSensor": {
+                        "settings": {
+                            "image": "mcr.microsoft.com/azureiotedge-simulated-temperature-sensor:1.0",
+                            "createOptions": ""
+                        },
+                        "type": "docker",
+                        "version": "1.0",
+                        "status": "running",
+                        "restartPolicy": "always"
+                    }
+                },
+                "runtime": {
+                    "settings": {
+                        "minDockerVersion": "v1.25"
+                    },
+                    "type": "docker"
+                },
+                "schemaVersion": "1.1",
+                "systemModules": {
+                    "edgeAgent": {
+                        "settings": {
+                            "image": "mcr.microsoft.com/azureiotedge-agent:1.2",
+                            "createOptions": ""
+                        },
+                        "type": "docker",
+                        "env": {
+                            "SendRuntimeQualityTelemetry": {
+                                "value": "false"
+                            }
+                        }
+                    },
+                    "edgeHub": {
+                        "settings": {
+                            "image": "mcr.microsoft.com/azureiotedge-hub:1.2",
+                            "createOptions": "{\"HostConfig\":{\"PortBindings\":{\"443/tcp\":[{\"HostPort\":\"443\"}],\"5671/tcp\":[{\"HostPort\":\"5671\"}],\"8883/tcp\":[{\"HostPort\":\"8883\"}]}}}"
+                        },
+                        "type": "docker",
+                        "status": "running",
+                        "restartPolicy": "always"
+                    }
+                }
+            }
+        },
+        "$edgeHub":{
+            "properties.desired":{
+               "schemaVersion":"1.2",
+               "routes":{
+                  "Route1":"FROM /messages/* INTO $upstream",
+                  "SimulatedTemperatureSensorToIoTHub": "FROM /messages/modules/SimulatedTemperatureSensor/* INTO $upstream"
+               },
+               "storeAndForwardConfiguration":{
+                  "timeToLiveSecs":7200
+               },
+               "mqttBroker":{
+                  "authorizations":[
+                     {
+                        "identities":[
+                           "rogue_client"
+                        ],
+                        "deny":[
+                           {
+                              "operations":[
+                                 "mqtt:connect"
+                              ]
+                           }
+                        ]
+                     },
+                     {
+                        "identities":[
+                           "{{iot:identity}}"
+                        ],
+                        "allow":[
+                           {
+                              "operations":[
+                                 "mqtt:connect"
+                              ]
+                           }
+                        ]
+                     },
+                     {
+                        "identities":[
+                           "sensor_1"
+                        ],
+                        "allow":[
+                           {
+                              "operations":[
+                                 "mqtt:publish"
+                              ],
+                              "resources":[
+                                 "events/alerts"
+                              ]
+                           }
+                        ]
+                     }
+                  ]
+               }
+            }
+         },
+        "SimulatedTemperatureSensor": {
+            "properties.desired": {
+                "SendData": true,
+                "SendInterval": 5
+            }
+        }
+    }
+}

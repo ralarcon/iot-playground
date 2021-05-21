@@ -123,3 +123,6 @@ sudo iotedge list
 
 az monitor log-analytics workspace create --resource-group iot-playground-rsg --workspace-name iot-playground-devices-log
 az deployment group create --resource-group iot-playground-rsg --template-file ./monitor-arm/azuremonitor-containerSolution.json --parameters ./monitor-arm/azuremonitor-containerSolution.params.json
+
+## DEVICE 1.2
+az deployment group create --resource-group iot-playground-rsg --template-uri "https://raw.githubusercontent.com/Azure/iotedge-vm-deploy/1.2.0/edgeDeploy.json" --parameters dnsLabelPrefix='iot-playground-edge7-vm' --parameters adminUsername='azureUser' --parameters deviceConnectionString=$(az iot hub device-identity connection-string show --device-id edge7-v12 --hub-name iot-playground-devices-hub -o tsv) --parameters authenticationType='password' --parameters adminPasswordOrKey="Pasa@palabra1"
