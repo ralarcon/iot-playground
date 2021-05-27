@@ -15,13 +15,13 @@
                                 "value": "AzureMonitor "
                             },
                             "LogAnalyticsWorkspaceId": {
-                                "value": "9f105e40-7fa1-4ef4-ae90-f3f4e346a96f"
+                                "value": ""
                             },
                             "LogAnalyticsSharedKey": {
-                                "value": "0NG6zGPeBM9VfjMG2O6+d4b0sDDMsEh3TGWOvh6GL6l/4azgpL8RsCZh0SlzfoDcOw30i+aWhw7Mw2rsu8701Q=="
+                                "value": ""
                             },
                             "HubResourceID": {
-                                "value": "/subscriptions/cff5d937-9797-41da-b990-ba5295efb820/resourceGroups/iot-playground-rsg/providers/Microsoft.Devices/IotHubs/iot-playground-devices-hub"
+                                "value": ""
                             }
                         },
                         "status": "running",
@@ -39,7 +39,7 @@
                                 "value": "Y"
                             },
                             "MSSQL_SA_PASSWORD": {
-                                "value": "Pass@word.123.###"
+                                "value": ""
                             },
                             "MSSQL_LCID": {
                                 "value": "1033"
